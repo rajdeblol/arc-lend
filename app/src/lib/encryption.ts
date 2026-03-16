@@ -22,6 +22,10 @@ function decryptToUint8Array(value: bigint[] | number[] | Uint8Array): Uint8Arra
   return new Uint8Array(value as number[]);
 }
 
+function toMatrix(value: Uint8Array): number[][] {
+  return [Array.from(value)];
+}
+
 export interface EncryptionContext {
   keypair: Keypair;
   cipher: RescueCipher;
@@ -59,6 +63,19 @@ export function decryptPayload(
   ciphertext: Uint8Array,
   nonce: Uint8Array,
 ): Uint8Array {
-  const decrypted = ctx.cipher.decrypt(ciphertext, nonce) as bigint[] | number[] | Uint8Array;
-  return decryptToUint8Array(decrypted);
+  const decryptFn = ctx.cipher.decrypt as unknown as (...args: unknown[]) => unknown;
+
+  let decrypted: unknown;
+  try {
+    decrypted = decryptFn(ciphertext, nonce);
+  } catch {
+    // Fallback for SDK variants that expect matrix-like args.
+    decrypted = decryptFn(toMatrix(ciphertext), toMatrix(nonce));
+  }
+
+  const normalized = decrypted as bigint[] | number[] | Uint8Array;
+  if (Array.isArray(normalized) && Array.isArray(normalized[0])) {
+    return new Uint8Array((normalized[0] as number[]).map((item) => Number(item)));
+  }
+  return decryptToUint8Array(normalized);
 }
