@@ -24,10 +24,20 @@ export function createEncryptionContext(sharedSecret: Uint8Array): EncryptionCon
 }
 
 export function encryptPayload(ctx: EncryptionContext, payload: Uint8Array): EncryptedPayload {
-  const [ciphertext, nonce] = ctx.cipher.encrypt(payload) as [
-    string | number[] | Uint8Array,
-    string | number[] | Uint8Array,
-  ];
+  const nonceSeed = Keypair.generate().publicKey.toBytes();
+  const encryptFn = ctx.cipher.encrypt as unknown as (...args: unknown[]) => unknown;
+
+  let encrypted: unknown;
+  try {
+    // Arcium SDK variants may require (payload, nonce).
+    encrypted = encryptFn(payload, nonceSeed);
+  } catch {
+    // Older variants may accept only (payload).
+    encrypted = encryptFn(payload);
+  }
+
+  const tuple = encrypted as [string | number[] | Uint8Array, string | number[] | Uint8Array];
+  const [ciphertext, nonce] = tuple;
   return {
     ciphertext: toUint8Array(ciphertext),
     nonce: toUint8Array(nonce),
