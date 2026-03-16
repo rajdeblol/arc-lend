@@ -1,0 +1,12 @@
+.DS_Store
+node_modules
+.target
+target
+.anchor
+.next
+out
+dist
+coverage
+.env
+.env.local
+app/.env.local

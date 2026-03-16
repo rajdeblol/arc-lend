@@ -1,0 +1,18 @@
+[package]
+name = "private-perps"
+version = "0.1.0"
+description = "Private Perpetuals using Arcium MPC"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "private_perps"
+
+[features]
+default = []
+no-entrypoint = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true }
+arcium-anchor = { workspace = true }

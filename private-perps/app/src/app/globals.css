@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 236 244 255;
+  --surface: 227 237 252;
+  --surface-subtle: 247 251 255;
+  --surface-border: 14 27 49;
+  --text: 11 22 40;
+  --text-muted: 70 90 124;
+  --accent: 56 104 255;
+  --accent-contrast: 243 249 255;
+  --profit: 20 148 89;
+  --loss: 184 43 43;
+  --blue: 41 187 255;
+  --brand-dark: 16 32 66;
+  --panel-soft: 233 242 255;
+  --panel-strong: 216 230 252;
+}
+
+[data-theme="dark"] {
+  --background: 10 18 32;
+  --surface: 16 29 50;
+  --surface-subtle: 24 41 69;
+  --surface-border: 195 220 255;
+  --text: 230 241 255;
+  --text-muted: 165 189 224;
+  --accent: 50 162 255;
+  --accent-contrast: 7 20 39;
+  --blue: 94 203 255;
+  --brand-dark: 9 22 44;
+  --panel-soft: 21 36 60;
+  --panel-strong: 27 46 76;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 700px at 20% -10%, rgba(41, 187, 255, 0.22), transparent),
+    radial-gradient(950px 620px at 80% 120%, rgba(56, 104, 255, 0.2), transparent),
+    rgb(var(--background));
+  color: rgb(var(--text));
+  font-family: var(--font-ui), "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.arcade-outline {
+  border: 3px solid rgb(var(--surface-border));
+  box-shadow: 4px 4px 0 rgb(var(--surface-border));
+}
+
+.arcade-btn {
+  border: 3px solid rgb(var(--surface-border));
+  box-shadow: 3px 3px 0 rgb(var(--surface-border));
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  transition: transform 120ms ease;
+}
+
+.arcade-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgb(var(--surface-border));
+}
+
+.arcade-btn-primary {
+  background: rgb(var(--accent));
+  color: rgb(var(--accent-contrast));
+}
+
+.arcade-btn-secondary {
+  background: rgb(var(--surface-subtle));
+  color: rgb(var(--text));
+}
+
+.arcade-chip {
+  border: 3px solid rgb(var(--surface-border));
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  background: rgba(247, 251, 255, 0.95);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.arcade-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}

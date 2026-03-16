@@ -1,0 +1,12 @@
+[project]
+name = "private-perps"
+cluster_offset = 456
+
+[circuits]
+source_dir = "encrypted-ixs"
+output_dir = "target/arcium"
+
+[deploy]
+recovery_set_size = 4
+keypair_path = "~/.config/solana/id.json"
+rpc_env_var = "HELIUS_DEVNET_RPC_URL"

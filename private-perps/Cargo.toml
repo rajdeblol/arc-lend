@@ -1,0 +1,15 @@
+[workspace]
+members = [
+  "programs/private-perps"
+]
+resolver = "2"
+
+[workspace.dependencies]
+anchor-lang = "0.32.1"
+arcium-anchor = "0.6"
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+panic = "abort"
