@@ -12,6 +12,16 @@ function toUint8Array(value: string | number[] | Uint8Array): Uint8Array {
   return new Uint8Array(value.split(",").map((part) => Number(part.trim())));
 }
 
+function decryptToUint8Array(value: bigint[] | number[] | Uint8Array): Uint8Array {
+  if (value instanceof Uint8Array) {
+    return value;
+  }
+  if (Array.isArray(value) && value.length > 0 && typeof value[0] === "bigint") {
+    return new Uint8Array((value as bigint[]).map((item) => Number(item)));
+  }
+  return new Uint8Array(value as number[]);
+}
+
 export interface EncryptionContext {
   keypair: Keypair;
   cipher: RescueCipher;
@@ -49,5 +59,6 @@ export function decryptPayload(
   ciphertext: Uint8Array,
   nonce: Uint8Array,
 ): Uint8Array {
-  return ctx.cipher.decrypt(ciphertext, nonce);
+  const decrypted = ctx.cipher.decrypt(ciphertext, nonce) as bigint[] | number[] | Uint8Array;
+  return decryptToUint8Array(decrypted);
 }
