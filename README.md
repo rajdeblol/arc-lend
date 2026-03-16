@@ -7,7 +7,7 @@ It protects borrower intent by keeping risk internals encrypted:
 - Health/liquidation checks execute on encrypted state and return only private status output.
 - Settlement flow returns borrower-readable outcomes without exposing raw risk parameters.
 
-## Submission Checklist (English)
+## Submission Checklist 
 
 ### 1) Functional Solana project integrated with Arcium
 - Solana wallet connection and transaction UX are implemented in the Next.js app.
