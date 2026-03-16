@@ -1,164 +1,77 @@
 # ArcLend
 
-ArcLend is a privacy-preserving lending/borrowing dApp on Solana testnet/devnet using Arcium MPC.
+ArcLend is my privacy-focused lending demo on Solana, powered by Arcium.
 
-It protects borrower intent by keeping risk internals encrypted:
-- Collateral and debt intents are stored as encrypted ciphertext (MXE-only visibility).
-- Health/liquidation checks execute on encrypted state and return only private status output.
-- Settlement flow returns borrower-readable outcomes without exposing raw risk parameters.
+The main idea is simple:
+regular onchain lending exposes collateral, debt, and health factors in public state.
+ArcLend avoids that by encrypting borrower intent and running risk checks through Arcium-style private computation.
 
-## Submission Checklist 
+Built by [Rajlol](https://x.com/rajlol01).
 
-### 1) Functional Solana project integrated with Arcium
-- Solana wallet connection and transaction UX are implemented in the Next.js app.
-- Arcium integration points are implemented in:
-  - `app/src/lib/arcium.ts`
-  - `app/src/lib/encryption.ts`
-  - `encrypted-ixs/*`
-  - `programs/<arclend-program>/src/lib.rs`
-- The frontend includes encrypted flow messaging and private-risk actions (borrow, health check, repay).
+## What this site does
+- Connect wallet (Phantom / Solflare)
+- Open a private borrow intent (collateral + borrow amount + term)
+- Run encrypted-style health checks
+- Repay and move loans to history
+- Show clear UI states (success / error / processing)
 
-### 2) Clear explanation of Arcium usage and privacy benefits
-- Client payloads are encrypted before private computation.
-- Risk logic (LTV/health/liquidation semantics) is executed in encrypted state.
-- Private outputs are shown to the borrower while preventing public exposure of sensitive risk metrics.
+## Why Arcium is used
+In ArcLend, Arcium is used to keep risk-sensitive lending data private.
 
-### 3) Open-source GitHub repository
-- Current local repository has no remote configured yet.
-- To satisfy this requirement, publish this code to a public GitHub repo:
+Practical flow in this project:
+1. User submits borrow input from the frontend.
+2. Payload is encrypted client-side (`app/src/lib/encryption.ts`, `app/src/lib/arcium.ts`).
+3. Risk logic (LTV / health / liquidation semantics) is treated as private compute flow.
+4. User sees borrower-facing result, without exposing raw risk details publicly.
 
-```bash
-cd arclend
-git init
-git add .
-git commit -m "ArcLend: Solana + Arcium private lending app"
-git branch -M main
-git remote add origin https://github.com/<your-username>/arclend.git
-git push -u origin main
-```
+Privacy benefit:
+- Reduces predatory liquidation visibility from publicly readable risk metrics.
 
-### 4) Submission language
-- All documentation and the requirement summary are in English.
+## Tech stack
+- Next.js (App Router) frontend: `app/`
+- Solana wallet adapter integration
+- Arcium client integration hooks
+- Anchor + Solana program scaffold: `programs/`
+- Encrypted instruction circuits: `encrypted-ixs/`
 
-## How Arcium Provides Privacy
-
-1. Client encrypts payloads with Arcium MXE public key material using RescueCipher.
-2. Program queues MPC computation (`invoke` phase) for an initialized computation definition.
-3. Arcium executes circuits on encrypted values.
-4. Callback instruction stores/handles encrypted outputs.
-5. Trader waits for finalization and decrypts only their own readable outputs.
-
-Each encrypted workflow follows Arcium's required 3-step model:
-- `init_comp_def` (once per encrypted instruction after deploy)
-- invoke instruction from client
-- callback instruction from Arcium cluster
-
-## Repository Structure
-
+## Project structure
 ```text
-arclend/
-├── encrypted-ixs/                      # Arcis encrypted circuits
-├── programs/<arclend-program>/src/lib.rs # Anchor program + Arcium callbacks
-├── tests/<arclend>.ts                   # Anchor/TS integration tests
-└── app/                                # Next.js App Router frontend
+.
+├── app/                 # ArcLend web app
+├── encrypted-ixs/       # Encrypted instruction circuits
+├── programs/            # Anchor/Solana program
+├── tests/               # Program tests
+├── Anchor.toml
+├── Arcium.toml
+└── package.json
 ```
 
-## Prerequisites
-
-- Rust stable + Cargo
-- Solana CLI `2.3.0`
-- Anchor CLI `0.32.1`
-- Arcium CLI
-- Node.js 20+
-- Yarn 1.22+
-- Devnet RPC URL (Helius recommended)
-
-## Setup
-
+## Run locally
+### 1) Install dependencies
 ```bash
-cd arclend
-cp app/.env.example app/.env.local
-
-# install frontend + test dependencies
 yarn install
-
-# initialize Arcium scaffold metadata (first run)
-arcium init
-
-# build encrypted circuits
-arcium build
-
-# build Anchor program
-anchor build
 ```
 
-## Devnet Deploy
-
+### 2) Configure env
 ```bash
-# set your RPC first
-export HELIUS_DEVNET_RPC_URL="https://devnet.helius-rpc.com/?api-key=<api-key>"
-
-# deploy with Arcium-required flags
-arcium deploy --cluster-offset 456 --recovery-set-size 4 --keypair-path ~/.config/solana/id.json --rpc-url "$HELIUS_DEVNET_RPC_URL"
-
-# deploy/update the Solana program
-anchor deploy --provider.cluster devnet
+cp app/.env.example app/.env.local
 ```
 
-## Initialize Computation Definitions
+Set testnet/devnet RPC in `app/.env.local`.
 
-Run once after deployment:
-
-```bash
-anchor run test
-```
-
-Or call the three init instructions from your client:
-- `init_open_position_comp_def`
-- `init_check_liquidation_comp_def`
-- `init_close_position_comp_def`
-
-## Run Tests
-
-```bash
-yarn test:program
-```
-
-## Run Frontend
-
+### 3) Start frontend
 ```bash
 cd app
 yarn dev
 ```
 
-Open `http://localhost:3000`.
+Open: `http://localhost:3000`
 
-## Architecture Diagram
+## Notes about current demo behavior
+- Faucet is manual via Solana faucet link in header.
+- Wallet SOL balance is live from RPC.
+- “Available SOL” in borrow form is wallet balance minus locally tracked locked collateral from active ArcLend loans.
+- This is a demo app and not production-ready lending infrastructure.
 
-```text
-+----------------------+         +-------------------------------+
-| Next.js Frontend     |         | Solana Program (Anchor)       |
-| - TradeForm          | invoke  | - open_position               |
-| - PositionCard       +-------->+ - check_liquidation           |
-| - PnlReveal          |         | - close_position              |
-+----------+-----------+         | - *_callback handlers         |
-           |                     +---------------+---------------+
-           | encrypted payload                   |
-           v                                     | queue_computation
-+----------------------+                         v
-| Arcium Client SDK    |                 +-------------------------+
-| - getMXEPublicKey    |                 | Arcium MPC Network      |
-| - RescueCipher       |                 | - open_position circuit |
-| - awaitFinalization  |                 | - liquidation circuit   |
-+----------+-----------+                 | - close_position circuit|
-           | decrypt result              +-----------+-------------+
-           +----------------------------------------+
-                                callback ciphertext / finalization
-```
-
-## Production Notes
-
-- UI deliberately avoids exposing position size and entry price.
-- Liquidation output is a private binary signal, not a threshold leak.
-- Use dedicated fee vault operations in `GlobalState` for production fee accounting.
-- For mainnet hardening, add rate-limits, slippage controls, and risk guardrails at order ingress.
+## Open-source repository
+GitHub: [https://github.com/rajdeblol/arc-lend](https://github.com/rajdeblol/arc-lend)
