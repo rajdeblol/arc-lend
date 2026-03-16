@@ -73,5 +73,3 @@ Open: `http://localhost:3000`
 - “Available SOL” in borrow form is wallet balance minus locally tracked locked collateral from active ArcLend loans.
 - This is a demo app and not production-ready lending infrastructure.
 
-## Open-source repository
-GitHub: [https://github.com/rajdeblol/arc-lend](https://github.com/rajdeblol/arc-lend)
