@@ -2,9 +2,12 @@ import { RescueCipher } from "@arcium-hq/client";
 import { Keypair } from "@solana/web3.js";
 import { EncryptedPayload } from "@/types";
 
-function toUint8Array(value: string | Uint8Array): Uint8Array {
+function toUint8Array(value: string | number[] | Uint8Array): Uint8Array {
   if (value instanceof Uint8Array) {
     return value;
+  }
+  if (Array.isArray(value)) {
+    return new Uint8Array(value);
   }
   return new Uint8Array(value.split(",").map((part) => Number(part.trim())));
 }
@@ -21,7 +24,10 @@ export function createEncryptionContext(sharedSecret: Uint8Array): EncryptionCon
 }
 
 export function encryptPayload(ctx: EncryptionContext, payload: Uint8Array): EncryptedPayload {
-  const { ciphertext, nonce } = ctx.cipher.encrypt(payload);
+  const [ciphertext, nonce] = ctx.cipher.encrypt(payload) as [
+    string | number[] | Uint8Array,
+    string | number[] | Uint8Array,
+  ];
   return {
     ciphertext: toUint8Array(ciphertext),
     nonce: toUint8Array(nonce),
